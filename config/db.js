@@ -10,23 +10,27 @@ const connectDB = async () => {
   }
 
   try {
-    // Optimize for serverless environment
+    // Optimize for serverless environment with more aggressive timeouts
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      minPoolSize: 2,
     });
 
     isConnected = true;
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    return conn;
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error(`MongoDB Connection Error: ${error.message}`);
+    console.error(`Error details:`, error);
     isConnected = false;
     
     // Don't exit process in production (Vercel)
     if (process.env.NODE_ENV !== 'production') {
       process.exit(1);
     } else {
-      throw error;
+      throw new Error(`Database connection failed: ${error.message}`);
     }
   }
 };
