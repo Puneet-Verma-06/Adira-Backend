@@ -13,7 +13,17 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());
+// Configure CORS to allow your frontend domain
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://sanju-three.vercel.app'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
