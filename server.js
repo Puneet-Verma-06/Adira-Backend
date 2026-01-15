@@ -29,19 +29,42 @@ app.use(express.urlencoded({ extended: true }));
 
 // Connect to MongoDB (lazy connection for serverless)
 let dbConnected = false;
+let connectionAttempts = 0;
+const MAX_CONNECTION_ATTEMPTS = 3;
+
 const ensureDbConnection = async (req, res, next) => {
-  if (!dbConnected) {
+  if (!dbConnected && connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
     try {
+      connectionAttempts++;
+      console.log(`MongoDB connection attempt ${connectionAttempts}/${MAX_CONNECTION_ATTEMPTS}`);
+      console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
+      console.log('NODE_ENV:', process.env.NODE_ENV);
+      
       await connectDB();
       dbConnected = true;
+      console.log('MongoDB connected successfully');
     } catch (error) {
-      console.error('Database connection error:', error);
-      return res.status(503).json({ 
-        success: false, 
-        message: 'Database connection failed' 
-      });
+      console.error('Database connection error:', error.message);
+      
+      // If max attempts reached, return error
+      if (connectionAttempts >= MAX_CONNECTION_ATTEMPTS) {
+        return res.status(503).json({ 
+          success: false, 
+          message: 'Database connection failed. Please check MongoDB Atlas network access settings.',
+          error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+      }
     }
   }
+  
+  // If still not connected after attempts, return error
+  if (!dbConnected) {
+    return res.status(503).json({ 
+      success: false, 
+      message: 'Database not available. Please try again later.' 
+    });
+  }
+  
   next();
 };
 
@@ -61,6 +84,18 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
+});
+
+// Debug endpoint to check env vars (remove in production)
+app.get('/api/debug', (req, res) => {
+  res.json({
+    nodeEnv: process.env.NODE_ENV,
+    hasMongoUri: !!process.env.MONGODB_URI,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    mongoUriStart: process.env.MONGODB_URI ? process.env.MONGODB_URI.substring(0, 20) + '...' : 'not set',
+    dbConnected: dbConnected,
+    connectionAttempts: connectionAttempts
+  });
 });
 
 // Error handling middleware
