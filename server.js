@@ -9,9 +9,6 @@ dotenv.config();
 // Initialize express app
 const app = express();
 
-// Connect to MongoDB
-connectDB();
-
 // Middleware
 // Configure CORS to allow your frontend domain
 const corsOptions = {
@@ -30,6 +27,27 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Connect to MongoDB (lazy connection for serverless)
+let dbConnected = false;
+const ensureDbConnection = async (req, res, next) => {
+  if (!dbConnected) {
+    try {
+      await connectDB();
+      dbConnected = true;
+    } catch (error) {
+      console.error('Database connection error:', error);
+      return res.status(503).json({ 
+        success: false, 
+        message: 'Database connection failed' 
+      });
+    }
+  }
+  next();
+};
+
+// Apply database connection middleware to all routes
+app.use('/api', ensureDbConnection);
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/wishlist', require('./routes/wishlist'));
@@ -37,6 +55,10 @@ app.use('/api/properties', require('./routes/property'));
 app.use('/api/admin', require('./routes/admin'));
 
 // Health check route
+app.get('/', (req, res) => {
+  res.json({ status: 'OK', message: 'Sanju Backend API is running' });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
