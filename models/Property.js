@@ -30,7 +30,11 @@ const propertySchema = new mongoose.Schema({
     city: String,
     state: String,
     country: String,
-    zipCode: String
+    zipCode: String,
+    coordinates: {
+      latitude: String,
+      longitude: String
+    }
   },
   area: {
     value: Number,
@@ -45,13 +49,41 @@ const propertySchema = new mongoose.Schema({
   amenities: [String],
   status: {
     type: String,
-    enum: ['available', 'sold', 'rented', 'under-contract'],
+    enum: ['available', 'sold', 'rented', 'under-contract', 'pending', 'preparing-selling', 'selling', 'not-available'],
     default: 'available'
   },
   isFeatured: {
     type: Boolean,
     default: false
   },
+  // Project-specific fields
+  content: String,
+  projectDetails: {
+    numberBlocks: Number,
+    numberFloors: Number,
+    numberFlats: Number,
+    lowestPrice: Number,
+    maxPrice: Number,
+    finishDate: Date,
+    openSellDate: Date
+  },
+  // SEO fields
+  seo: {
+    title: String,
+    description: String,
+    image: String,
+    index: {
+      type: Boolean,
+      default: true
+    }
+  },
+  // Additional information
+  youtubeVideo: String,
+  privateNotes: String,
+  uniqueId: String,
+  permalink: String,
+  categories: [String],
+  investor: String,
   // Owner contact information (private - not displayed publicly)
   ownerPhone: {
     type: String,
