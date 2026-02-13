@@ -77,6 +77,8 @@ app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/properties', require('./routes/property'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/consults', require('./routes/consult'));
+app.use('/api/consult-fields', require('./routes/consultField'));
+app.use('/api/pages', require('./routes/page'));
 
 // Health check route
 app.get('/', (req, res) => {

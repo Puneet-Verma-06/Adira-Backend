@@ -25,6 +25,11 @@ const consultSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  customFields: {
+    type: Map,
+    of: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
   ipAddress: {
     type: String,
     trim: true
