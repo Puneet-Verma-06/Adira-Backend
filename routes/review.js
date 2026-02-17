@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { auth } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const {
   getPropertyReviews,
   createReview,
@@ -12,12 +12,12 @@ const {
 router.get('/property/:propertyId', getPropertyReviews);
 
 // Create a review (authenticated users only)
-router.post('/property/:propertyId', auth, createReview);
+router.post('/property/:propertyId', protect, createReview);
 
 // Update a review (authenticated users only)
-router.put('/:reviewId', auth, updateReview);
+router.put('/:reviewId', protect, updateReview);
 
 // Delete a review (authenticated users only)
-router.delete('/:reviewId', auth, deleteReview);
+router.delete('/:reviewId', protect, deleteReview);
 
 module.exports = router;
