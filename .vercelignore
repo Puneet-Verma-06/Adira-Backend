@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local env files
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+__tests__
+
+# Development files
+seedData.js
+seedPages.js
+seedConsultFields.js
+cleanWishlist.js
+checkPropertyIds.js
+
+# Documentation
+*.md
+!README.md
+
+# Misc
+*.log
+.cache
