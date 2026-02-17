@@ -81,6 +81,7 @@ app.use('/api/consults', require('./routes/consult'));
 app.use('/api/consult-fields', require('./routes/consultField'));
 app.use('/api/pages', require('./routes/page'));
 app.use('/api/upload', require('./routes/upload'));
+app.use('/api/reviews', require('./routes/review'));
 
 // Health check route
 app.get('/', (req, res) => {
