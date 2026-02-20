@@ -34,17 +34,9 @@ const userSchema = new mongoose.Schema({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Property' }],
     default: []
   },
-  otp: {
-    type: String,
-    select: false
-  },
-  otpExpiry: {
-    type: Date,
-    select: false
-  },
   isVerified: {
     type: Boolean,
-    default: false
+    default: true
   },
   createdAt: {
     type: Date,
@@ -52,14 +44,20 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Hash password before saving
+// Hash password before saving (only if password is modified and not already hashed)
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {
-    next();
+    return next();
+  }
+  
+  // Check if password is already hashed (from PendingUser)
+  if (this.password.startsWith('$2a$') || this.password.startsWith('$2b$')) {
+    return next();
   }
   
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
 // Compare password method

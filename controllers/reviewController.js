@@ -1,5 +1,6 @@
 const Review = require('../models/Review');
 const Property = require('../models/Property');
+const User = require('../models/User');
 
 // Get all reviews for a property
 exports.getPropertyReviews = async (req, res) => {
@@ -127,8 +128,11 @@ exports.updateReview = async (req, res) => {
       });
     }
 
-    // Check if user owns this review
-    if (review.user.toString() !== userId.toString()) {
+    // Get user to check if admin
+    const user = await User.findById(userId);
+    
+    // Check if user owns this review or is an admin
+    if (review.user.toString() !== userId.toString() && user?.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: 'You can only update your own reviews'
@@ -172,8 +176,11 @@ exports.deleteReview = async (req, res) => {
       });
     }
 
-    // Check if user owns this review
-    if (review.user.toString() !== userId.toString()) {
+    // Get user to check if admin
+    const user = await User.findById(userId);
+    
+    // Check if user owns this review or is an admin
+    if (review.user.toString() !== userId.toString() && user?.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: 'You can only delete your own reviews'

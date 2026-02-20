@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const PendingUser = require('../models/PendingUser');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const { generateOTP, sendOTPEmail } = require('../utils/emailService');
@@ -26,9 +27,9 @@ exports.signup = async (req, res) => {
 
     const { name, email, password } = req.body;
 
-    // Check if user already exists and is verified
-    let user = await User.findOne({ email });
-    if (user && user.isVerified) {
+    // Check if user already exists in User collection
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return res.status(400).json({
         success: false,
         message: 'User already exists with this email'
@@ -39,22 +40,24 @@ exports.signup = async (req, res) => {
     const otp = generateOTP();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    if (user && !user.isVerified) {
-      // Update existing unverified user
-      user.name = name;
-      user.password = password;
-      user.otp = otp;
-      user.otpExpiry = otpExpiry;
-      await user.save();
+    // Check if there's a pending user with this email
+    let pendingUser = await PendingUser.findOne({ email });
+    
+    if (pendingUser) {
+      // Update existing pending user
+      pendingUser.name = name;
+      pendingUser.password = password;
+      pendingUser.otp = otp;
+      pendingUser.otpExpiry = otpExpiry;
+      await pendingUser.save();
     } else {
-      // Create new user with OTP
-      user = await User.create({
+      // Create new pending user (NOT in User collection yet)
+      pendingUser = await PendingUser.create({
         name,
         email,
         password,
         otp,
-        otpExpiry,
-        isVerified: false
+        otpExpiry
       });
     }
 
@@ -65,7 +68,7 @@ exports.signup = async (req, res) => {
       success: true,
       message: 'OTP sent to your email. Please verify to complete registration.',
       data: {
-        email: user.email,
+        email: pendingUser.email,
         message: 'Please check your email for the OTP'
       }
     });
@@ -93,25 +96,18 @@ exports.verifyOTP = async (req, res) => {
       });
     }
 
-    // Find user with OTP
-    const user = await User.findOne({ email }).select('+otp +otpExpiry');
+    // Find pending user with OTP
+    const pendingUser = await PendingUser.findOne({ email });
 
-    if (!user) {
+    if (!pendingUser) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
-      });
-    }
-
-    if (user.isVerified) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already verified. Please login.'
+        message: 'No pending registration found. Please sign up first.'
       });
     }
 
     // Check if OTP matches
-    if (user.otp !== otp) {
+    if (pendingUser.otp !== otp) {
       return res.status(400).json({
         success: false,
         message: 'Invalid OTP'
@@ -119,30 +115,35 @@ exports.verifyOTP = async (req, res) => {
     }
 
     // Check if OTP is expired
-    if (user.otpExpiry < Date.now()) {
+    if (pendingUser.otpExpiry < Date.now()) {
       return res.status(400).json({
         success: false,
         message: 'OTP has expired. Please request a new one.'
       });
     }
 
-    // Mark user as verified
-    user.isVerified = true;
-    user.otp = undefined;
-    user.otpExpiry = undefined;
-    await user.save();
+    // Create actual user in User collection (now verified)
+    const newUser = await User.create({
+      name: pendingUser.name,
+      email: pendingUser.email,
+      password: pendingUser.password, // Already hashed in PendingUser
+      isVerified: true
+    });
+
+    // Delete pending user
+    await PendingUser.deleteOne({ email });
 
     // Generate token
-    const token = generateToken(user._id);
+    const token = generateToken(newUser._id);
 
     res.status(200).json({
       success: true,
-      message: 'Email verified successfully',
+      message: 'Email verified successfully. You can now login.',
       data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
         token
       }
     });
@@ -170,20 +171,13 @@ exports.resendOTP = async (req, res) => {
       });
     }
 
-    // Find user
-    const user = await User.findOne({ email });
+    // Find pending user
+    const pendingUser = await PendingUser.findOne({ email });
 
-    if (!user) {
+    if (!pendingUser) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
-      });
-    }
-
-    if (user.isVerified) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already verified. Please login.'
+        message: 'No pending registration found. Please sign up first.'
       });
     }
 
@@ -191,18 +185,18 @@ exports.resendOTP = async (req, res) => {
     const otp = generateOTP();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    user.otp = otp;
-    user.otpExpiry = otpExpiry;
-    await user.save();
+    pendingUser.otp = otp;
+    pendingUser.otpExpiry = otpExpiry;
+    await pendingUser.save();
 
     // Send OTP email
-    await sendOTPEmail(email, otp, user.name);
+    await sendOTPEmail(email, otp, pendingUser.name);
 
     res.status(200).json({
       success: true,
       message: 'OTP resent to your email',
       data: {
-        email: user.email
+        email: pendingUser.email
       }
     });
   } catch (error) {
@@ -237,14 +231,6 @@ exports.login = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
-      });
-    }
-
-    // Check if email is verified
-    if (!user.isVerified) {
-      return res.status(401).json({
-        success: false,
-        message: 'Please verify your email first. Check your inbox for OTP.'
       });
     }
 

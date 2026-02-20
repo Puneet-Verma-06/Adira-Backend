@@ -1,4 +1,5 @@
 const Property = require('../models/Property');
+const User = require('../models/User');
 
 // Create a new property
 exports.createProperty = async (req, res) => {
@@ -155,8 +156,11 @@ exports.updateProperty = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' });
     }
 
-    // Check if the user is the owner
-    if (property.postedBy.toString() !== req.userId) {
+    // Get user to check if admin
+    const user = await User.findById(req.userId);
+    
+    // Check if the user is the owner or an admin
+    if (property.postedBy.toString() !== req.userId && user?.role !== 'admin') {
       return res.status(403).json({ message: 'Not authorized to update this property' });
     }
 
@@ -176,7 +180,7 @@ exports.updateProperty = async (req, res) => {
   }
 };
 
-// Delete property (only by owner)
+// Delete property (only by owner or admin)
 exports.deleteProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
@@ -185,8 +189,11 @@ exports.deleteProperty = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' });
     }
 
-    // Check if the user is the owner
-    if (property.postedBy.toString() !== req.userId) {
+    // Get user to check if admin
+    const user = await User.findById(req.userId);
+    
+    // Check if the user is the owner or an admin
+    if (property.postedBy.toString() !== req.userId && user?.role !== 'admin') {
       return res.status(403).json({ message: 'Not authorized to delete this property' });
     }
 
