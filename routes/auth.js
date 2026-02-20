@@ -3,6 +3,8 @@ const router = express.Router();
 const { body } = require('express-validator');
 const {
   signup,
+  verifyOTP,
+  resendOTP,
   login,
   getMe,
   logout
@@ -25,6 +27,8 @@ const loginValidation = [
 
 // Routes
 router.post('/signup', signupValidation, signup);
+router.post('/verify-otp', verifyOTP);
+router.post('/resend-otp', resendOTP);
 router.post('/login', loginValidation, login);
 router.get('/me', protect, getMe);
 router.post('/logout', logout);
