@@ -37,7 +37,7 @@ const seedPages = async () => {
         description: 'Learn more about our company and mission',
         content: `Welcome to Sunshine Real Estate!
 
-We are a leading real estate company dedicated to helping you find your dream property. With years of experience in the industry, we provide comprehensive services including property sales, rentals, and consultations.
+We are a leading real estate company dedicated to helping you find your dream property. With years of experience in the industry, we provide comprehensive services including property sales, construction, and consultations.
 
 Our Mission:
 To provide exceptional service and help our clients make informed decisions about their real estate investments.

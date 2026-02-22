@@ -38,7 +38,7 @@ const sampleProperties = [
     title: "Cozy Downtown Apartment",
     description: "Perfect 2-bedroom apartment in the heart of the city. Close to shopping centers, restaurants, and public transportation. Ideal for young professionals.",
     propertyType: "residential",
-    listingType: "rent",
+    listingType: "construction",
     price: 35000,
     location: {
       address: "45 MG Road",
@@ -67,7 +67,7 @@ const sampleProperties = [
     title: "Commercial Office Space",
     description: "Prime commercial office space in business district. Perfect for startups and growing businesses. Comes with modern amenities and ample parking.",
     propertyType: "commercial",
-    listingType: "rent",
+    listingType: "construction",
     price: 150000,
     location: {
       address: "Tower A, Cyber City",
@@ -208,7 +208,7 @@ const sampleProperties = [
     title: "Budget-Friendly Studio",
     description: "Compact and efficient studio apartment perfect for students or young professionals. Fully furnished and ready to move in.",
     propertyType: "residential",
-    listingType: "rent",
+    listingType: "construction",
     price: 15000,
     location: {
       address: "12 College Road",
@@ -293,7 +293,7 @@ const seedDatabase = async () => {
     console.log(`Total Properties: ${properties.length}`);
     console.log(`Featured Properties: ${properties.filter(p => p.isFeatured).length}`);
     console.log(`For Sale: ${properties.filter(p => p.listingType === 'sale').length}`);
-    console.log(`For Rent: ${properties.filter(p => p.listingType === 'rent').length}`);
+    console.log(`For Construction: ${properties.filter(p => p.listingType === 'construction').length}`);
     
     console.log('\n=== Property Types ===');
     const types = properties.reduce((acc, p) => {
