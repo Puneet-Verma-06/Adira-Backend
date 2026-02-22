@@ -26,12 +26,8 @@ const connectDB = async () => {
     console.error(`Error details:`, error);
     isConnected = false;
     
-    // Don't exit process in production (Vercel)
-    if (process.env.NODE_ENV !== 'production') {
-      process.exit(1);
-    } else {
-      throw new Error(`Database connection failed: ${error.message}`);
-    }
+    // Always throw the error so it can be handled properly
+    throw new Error(`Database connection failed: ${error.message}`);
   }
 };
 
