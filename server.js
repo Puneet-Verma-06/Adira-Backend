@@ -47,13 +47,16 @@ const ensureDbConnection = async (req, res, next) => {
       console.log('MongoDB connected successfully');
     } catch (error) {
       console.error('Database connection error:', error.message);
+      console.error('Full error:', error);
       
       // If max attempts reached, return error
       if (connectionAttempts >= MAX_CONNECTION_ATTEMPTS) {
         return res.status(503).json({ 
           success: false, 
           message: 'Database connection failed. Please check MongoDB Atlas network access settings.',
-          error: process.env.NODE_ENV === 'development' ? error.message : undefined
+          error: error.message, // Temporarily show error in production for debugging
+          mongoUri: process.env.MONGODB_URI ? 'exists' : 'missing',
+          nodeEnv: process.env.NODE_ENV
         });
       }
     }
