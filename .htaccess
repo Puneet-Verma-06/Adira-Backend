@@ -1,0 +1,35 @@
+# Hostinger Node.js Application Configuration
+# This routes all requests to your Node.js application
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  
+  # Redirect HTTP to HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  
+  # Allow direct access to static files
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^(.*)$ $1 [L]
+  
+  # Route all other requests to Node.js
+  RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Block access to sensitive files
+<FilesMatch "\.(env|log|sql|md)$">
+  Order allow,deny
+  Deny from all
+</FilesMatch>
