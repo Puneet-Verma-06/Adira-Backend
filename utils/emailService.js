@@ -5,8 +5,8 @@ const createTransporter = () => {
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'baserainfrahome@gmail.com', // Replace with actual email
-      pass: 'dhbr khlx xatl kqag'
+      user: process.env.GMAIL_USER || 'adiraestate@gmail.com',
+      pass: process.env.GMAIL_APP_PASSWORD
     }
   });
 };
@@ -22,7 +22,7 @@ const sendOTPEmail = async (email, otp, name) => {
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: '"Basera Infra Home" <baserainfrahome@gmail.com>',
+      from: `"Adira Estate" <${process.env.GMAIL_USER || 'adiraestate@gmail.com'}>`,
       to: email,
       subject: 'Email Verification - OTP',
       html: `
@@ -78,11 +78,11 @@ const sendOTPEmail = async (email, otp, name) => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>Basera Infra Home</h1>
+              <h1>Adira Estate</h1>
             </div>
             <div class="content">
               <h2>Hello ${name || 'User'},</h2>
-              <p>Thank you for signing up with Basera Infra Home!</p>
+              <p>Thank you for signing up with Adira Estate!</p>
               <p>To complete your registration, please use the following One-Time Password (OTP):</p>
               
               <div class="otp-box">
@@ -98,7 +98,7 @@ const sendOTPEmail = async (email, otp, name) => {
               
               <p>If you have any questions, feel free to contact our support team.</p>
               
-              <p>Best regards,<br>Basera Infra Home Team</p>
+              <p>Best regards,<br>Adira Estate Team</p>
             </div>
             <div class="footer">
               <p>This is an automated email. Please do not reply to this message.</p>
