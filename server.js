@@ -25,8 +25,8 @@ const corsOptions = {
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:3000',
-    'https://baserainfrahome.com',
-    'http://baserainfrahome.com'
+    'https://adiraestate.com',
+    'http://adiraestate.com'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
