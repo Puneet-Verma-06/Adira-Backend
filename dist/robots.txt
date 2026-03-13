@@ -5,7 +5,7 @@ Disallow: /admin
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://baserainfrahome.com/sitemap.xml
+Sitemap: https://adiraestate.com/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1
