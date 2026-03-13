@@ -129,11 +129,11 @@ app.use('/api/testimonials', ensureDbConnection, require('./routes/testimonial')
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Serve static files from React build folder (after API routes)
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // Serve React app for all non-API routes (must be AFTER API routes)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 // Error handling middleware
